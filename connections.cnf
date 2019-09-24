@@ -1,0 +1,14 @@
+[mysql]
+host = 127.0.0.1
+port = 3306
+user = root
+password = senslope
+dbname = senslopedb
+
+
+[pg]
+host = 127.0.0.1
+port = 5433
+user = postgres
+password = senslope
+dbname = dyna_lrkb

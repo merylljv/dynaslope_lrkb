@@ -24,9 +24,6 @@ def connect(dbc='pg'):
     Returns:
         connection (sqlalchemy.engine.base.Engine): Database connection.
 
-    Raises:
-        MySQLdb.OperationalError: Error in database connection.
-
     """ 
     
     if dbc not in ['mysql', 'pg']:
@@ -142,7 +139,7 @@ def write_df(df, table_name, schema='public', index=False, dbc='pg'):
     df2 = df2.drop_duplicates()
     columns = ', '.join(df2.columns)
     tuple_list = map(lambda x: tuple(map(str, x)), df2.values)
-    values = ', '.join(list(map(str, tuple_list))).replace('nan', 'NULL')
+    values = ', '.join(list(map(str, tuple_list))).replace('"', '').replace("'nan'", 'NULL').replace("'None'", 'NULL')
 
     query = "INSERT INTO {} ({}) VALUES {} ".format(table_name, columns, values)
 

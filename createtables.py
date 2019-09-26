@@ -21,12 +21,18 @@ import querydb as qdb
 
 
 def create_schema(schema):
+    """Creates schema for Landslide Risk Knowledge Base in PostgreSQL/PostGIS.
+
+    """ 
+
     query = "CREATE SCHEMA IF NOT EXISTS {}".format(schema)
     qdb.execute(query)
 
 
 def create_tables():
-    
+    """Creates tables for Landslide Risk Knowledge Base in PostgreSQL/PostGIS.
+
+    """ 
         
     pk_contraint = "CONSTRAINT {}_pk PRIMARY KEY ({})"
     uq_contraint = "CONSTRAINT {}_uq UNIQUE ({})"
@@ -75,9 +81,9 @@ def create_tables():
     index += 1
 
 
-    ############################## hazard SCHEMA ##############################
+    ############################## spatial SCHEMA ##############################
     
-    schema = 'hazard'
+    schema = 'spatial'
     create_schema(schema)
     
     #################### exposure ####################
@@ -104,7 +110,7 @@ def create_tables():
     pk_id = 'se_id'
     uq_list = ['site_id', 'exp_id', 'geom']
     fk_dict = {'site_id': {'ref_schema': 'public', 'ref_table': 'site'},
-               'exp_id': {'ref_schema': 'hazard', 'ref_table': 'exposure'}}
+               'exp_id': {'ref_schema': 'spatial', 'ref_table': 'exposure'}}
     query = """CREATE TABLE IF NOT EXISTS {}.{} (
           {} BIGSERIAL,   
           site_id INTEGER,
@@ -148,7 +154,7 @@ def create_tables():
     pk_id = 'sf_id'
     uq_list = ['site_id', 'feat_id', 'geom']
     fk_dict = {'site_id': {'ref_schema': 'public', 'ref_table': 'site'},
-               'feat_id': {'ref_schema': 'hazard', 'ref_table': 'feature'}}
+               'feat_id': {'ref_schema': 'spatial', 'ref_table': 'feature'}}
     query = """CREATE TABLE IF NOT EXISTS {}.{} (
           {} BIGSERIAL,   
           site_id INTEGER,
@@ -213,7 +219,7 @@ def create_tables():
     pk_id = 'sm_id'
     uq_list = ['site_id', 'mon_id', 'geom']
     fk_dict = {'site_id': {'ref_schema': 'public', 'ref_table': 'site'},
-               'mon_id': {'ref_schema': 'hazard', 'ref_table': 'monitoring'}}
+               'mon_id': {'ref_schema': 'spatial', 'ref_table': 'monitoring'}}
     query = """CREATE TABLE IF NOT EXISTS {}.{} (
           {} BIGSERIAL,   
           site_id INTEGER,
@@ -368,7 +374,7 @@ def create_tables():
     table_name = 'marker_history'
     pk_id = 'hist_id'
     uq_list = ['sm_id', 'ts', 'event']
-    fk_dict = {'sm_id': {'ref_schema': 'hazard', 'ref_table': 'site_monitoring'}}
+    fk_dict = {'sm_id': {'ref_schema': 'spatial', 'ref_table': 'site_monitoring'}}
     query = """CREATE TABLE IF NOT EXISTS {}.{} (
           {} BIGSERIAL,
           sm_id BIGINT,
@@ -394,7 +400,7 @@ def create_tables():
     table_name = 'marker_data'
     pk_id = 'data_id'
     uq_list = ['sm_id', 'mo_id']
-    fk_dict = {'sm_id': {'ref_schema': 'hazard', 'ref_table': 'site_monitoring'},
+    fk_dict = {'sm_id': {'ref_schema': 'spatial', 'ref_table': 'site_monitoring'},
                'mo_id': {'ref_schema': 'temporal', 'ref_table': 'marker_observation'}}
     query = """CREATE TABLE IF NOT EXISTS {}.{} (
           {} BIGSERIAL,
@@ -461,7 +467,7 @@ def create_tables():
     table_name = 'logger'
     pk_id = 'logger_id'
     uq_list = ['sm_id']
-    fk_dict = {'sm_id': {'ref_schema': 'hazard', 'ref_table': 'site_monitoring'},
+    fk_dict = {'sm_id': {'ref_schema': 'spatial', 'ref_table': 'site_monitoring'},
                'model_id': {'ref_schema': 'temporal', 'ref_table': 'logger_model'}}
     query = """CREATE TABLE IF NOT EXISTS {}.{} (
           {} SERIAL,   

@@ -1,14 +1,14 @@
 [mysql]
-host = 127.0.0.1
+host = 192.168.150.75
 port = 3306
-user = root
-password = senslope
+user = dyna_staff
+password = accelerometer
 dbname = senslopedb
 
 
 [pg]
 host = 127.0.0.1
-port = 5433
+port = 5432
 user = postgres
 password = senslope
 dbname = dyna_lrkb

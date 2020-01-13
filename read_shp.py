@@ -7,75 +7,12 @@ Created on Thu Sep  5 14:44:46 2019
 @author: Data Scientist 1
 """
 
-########################## READ SHAPEFILE ##########################
-
-#import geopandas as gpd
-#
-#
-#filename = "C:\\Users\\Data Scientist 1\\Documents\\ArcGIS\\Default.gdb\\Export_Output.shp"
-#hh_filename = "D:\\Meryll\\Research\\LRKB\\IMU\\Site Map\\Households.shp"
-#
-#hh = gpd.read_file(hh_filename).loc[:, ['NAME', 'geometry']].sort_values('NAME')
-#hh_str = ', '.join(hh.apply(lambda row: "(2, 1, {}, ST_GeomFromText('{}'))".format(row.NAME, row.geometry), axis=1).values)
-#
-#
-#
-#
-#
-#query =  "INSERT INTO public.site_exposure "
-#query += "(exp_id, site_id, label_name, geom) "
-#query += "VALUES {};".format(hh_str)
-#print(query.replace(", (", ",\n(").replace(") ", ")\n"))
-
-########################## GET POINTS OF POLY LINE ##########################
-
-from arcpy import da
 from datetime import datetime
-import arcpy
 import geopandas as gpd
 import numpy as np
 import os
 import pandas as pd
 import re
-
-
-def get_active_layer(mxd_filename):
-    mxd = arcpy.mapping.MapDocument(mxd_filename)
-    active_lyr = []
-    for lyr in arcpy.mapping.ListLayers(mxd):
-        if lyr.supports("DATASOURCE"):
-            active_lyr += [str(lyr.dataSource)]
-    active_lyr = pd.Series(active_lyr)
-    active_lyr = sorted(active_lyr[(active_lyr.str.contains('.shp')) & (active_lyr.str.contains('Site Map'))])
-    return (active_lyr)
-
-
-def get_vertex(filename):
-    """For each polygon geometry in a shapefile get the sequence number and
-    and coordinates of each vertex and tie it to the OID of its corresponding
-    polygon"""
-
-    vtx_dict = {}
-    s_fields = ['OID@', 'Shape@XY']
-    pt_array = da.FeatureClassToNumPyArray(filename, s_fields, 
-        explode_to_points=True)
-
-    for oid, xy in pt_array:
-        xy_tup = tuple(xy)
-        if oid not in vtx_dict:
-            vtx_dict[oid] = [xy_tup]
-        # this clause ensures that the first/last point which is listed
-        # twice only appears in the list once
-        elif xy_tup not in vtx_dict[oid]:
-            vtx_dict[oid].append(xy_tup)
-
-
-    vtx_sheet = []
-    for oid, vtx_list in vtx_dict.iteritems():
-        for i, vtx in enumerate(vtx_list):
-            vtx_sheet.append((oid, i, vtx[0], vtx[1]))
-    
-    return vtx_sheet
 
 
 def shp_file_data(file_path, filename_list):
@@ -160,9 +97,8 @@ def shp_file_data(file_path, filename_list):
             shp_file.loc[:, 'version'] = version
             shp_file.loc[:, 'activated'] = activated
             shp_file.loc[:, 'deactivated'] = deactivated
-            shp_df = shp_df.append(shp_file, ignore_index=True)
+            shp_df = shp_df.append(shp_file, ignore_index=True, sort=False)
     
-    shp_df = shp_df.rename(columns={'NAME': 'label_name',
-                                    'geometry': 'geom'})
+    shp_df = shp_df.rename(columns={'NAME': 'label_name'})
 
     return shp_df

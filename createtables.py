@@ -112,7 +112,7 @@ def create_tables():
     fk_dict = {'site_id': {'ref_schema': 'public', 'ref_table': 'site'},
                'exp_id': {'ref_schema': 'spatial', 'ref_table': 'exposure'}}
     query = """CREATE TABLE IF NOT EXISTS {}.{} (
-          {} BIGSERIAL,   
+          {} SERIAL,   
           site_id INTEGER,
           exp_id INTEGER,
           label_name VARCHAR,
@@ -156,7 +156,7 @@ def create_tables():
     fk_dict = {'site_id': {'ref_schema': 'public', 'ref_table': 'site'},
                'feat_id': {'ref_schema': 'spatial', 'ref_table': 'feature'}}
     query = """CREATE TABLE IF NOT EXISTS {}.{} (
-          {} BIGSERIAL,   
+          {} SERIAL,   
           site_id INTEGER,
           feat_id INTEGER,
           geom GEOMETRY,
@@ -221,7 +221,7 @@ def create_tables():
     fk_dict = {'site_id': {'ref_schema': 'public', 'ref_table': 'site'},
                'mon_id': {'ref_schema': 'spatial', 'ref_table': 'monitoring'}}
     query = """CREATE TABLE IF NOT EXISTS {}.{} (
-          {} BIGSERIAL,   
+          {} SERIAL,   
           site_id INTEGER,
           mon_id INTEGER,
           label_name VARCHAR,
@@ -353,7 +353,7 @@ def create_tables():
     uq_list = ['site_id', 'ts']
     fk_dict = {'site_id': {'ref_schema': 'public', 'ref_table': 'site'}}
     query = """CREATE TABLE IF NOT EXISTS {}.{} (
-          {} BIGSERIAL,   
+          {} SERIAL,   
           site_id INTEGER,
           ts TIMESTAMP,
           meas_type VARCHAR(7),
@@ -376,7 +376,7 @@ def create_tables():
     uq_list = ['sm_id', 'ts', 'event']
     fk_dict = {'sm_id': {'ref_schema': 'spatial', 'ref_table': 'site_monitoring'}}
     query = """CREATE TABLE IF NOT EXISTS {}.{} (
-          {} BIGSERIAL,
+          {} SERIAL,
           sm_id BIGINT,
           ts TIMESTAMP,
           event BOOLEAN,
@@ -403,7 +403,7 @@ def create_tables():
     fk_dict = {'sm_id': {'ref_schema': 'spatial', 'ref_table': 'site_monitoring'},
                'mo_id': {'ref_schema': 'temporal', 'ref_table': 'marker_observation'}}
     query = """CREATE TABLE IF NOT EXISTS {}.{} (
-          {} BIGSERIAL,
+          {} SERIAL,
           mo_id BIGINT,
           sm_id BIGINT,
           measurement NUMERIC(5,1),
@@ -424,7 +424,7 @@ def create_tables():
     uq_list = ['data_id']
     fk_dict = {'data_id': {'ref_schema': 'temporal', 'ref_table': 'marker_data'}}
     query = """CREATE TABLE IF NOT EXISTS {}.{} (
-          {} BIGSERIAL,
+          {} SERIAL,
           data_id BIGINT,
           displacement NUMERIC(4,1),
           time_delta FLOAT,

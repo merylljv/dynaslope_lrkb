@@ -5,10 +5,10 @@ Created on Thu Sep  5 14:44:46 2019
 @author: Data Scientist 1
 """
 
-import numpy as np
 import os
 import pandas as pd
 import re
+import sys
 
 import querydb as qdb
 import read_shp as shp
@@ -60,7 +60,7 @@ def spatial_dict():
                                    'Mohon',
                                    'Piezometer',
                                    'Sensor',
-                                   'Sensor (Gateway)',
+                                   'Sensor Gateway',
                                    'Sensor (Damaged)',
                                    'Sensor (LiDAR)',
                                    'Surficial Marker'],
@@ -114,39 +114,45 @@ def site_spatial_data(file_path):
                         "Feature": {'id': 'feat_id',
                                     'name': 'feat_name'}, 
                         "Monitoring": {'id': 'mon_id',
-                                       'name': 'mon_name'}}
+                                       'name': 'mon_name'}, 
+                        "Hazard_Zone": {'id': 'site_id'}}
     for spatial_cat in spatial_cat_dict.keys():
-        query = "SELECT * FROM spatial.{}".format(spatial_cat.lower())
-        ref_id = qdb.read_df(query)
+        print(spatial_cat)
+        columns = ['site_id', 'geometry', 'activated', 'deactivated']
+        table_name = spatial_cat.lower()
         spatial_df = shp_df.loc[shp_df.spatial_cat == spatial_cat]
-        spatial_df = spatial_df.rename(columns = {'name': spatial_cat_dict[spatial_cat]['name']})        
-        spatial_df = pd.merge(spatial_df, ref_id, on=spatial_cat_dict[spatial_cat]['name'])
+        if spatial_cat != 'Hazard_Zone':
+            columns.append(spatial_cat_dict[spatial_cat]['id'])
+            table_name = "site_{}".format(table_name)
+            query = "SELECT * FROM spatial.{}".format(spatial_cat.lower())
+            ref_id = qdb.read_df(query)
+            spatial_df = spatial_df.rename(columns = {'name': spatial_cat_dict[spatial_cat]['name']})        
+            spatial_df = pd.merge(spatial_df, ref_id, on=spatial_cat_dict[spatial_cat]['name'])
         spatial_df = spatial_df.sort_values(['deactivated', 'version', 'activated'], ascending=[False, False, False])
         for index in set(spatial_df[spatial_cat_dict[spatial_cat]['id']]):
             spatial_df_id = spatial_df.loc[spatial_df[spatial_cat_dict[spatial_cat]['id']] == index, :]
-            spatial_df_id.loc[spatial_df_id.index.isin(spatial_df_id.geom.drop_duplicates(keep='last').index), :]
-            columns = ['site_id', spatial_cat_dict[spatial_cat]['id'], 'geom',
-                       'activated', 'deactivated']
+            if len(spatial_df_id) > 1:
+                spatial_df_id = spatial_df_id.loc[spatial_df_id.index.isin(spatial_df_id.geometry.drop_duplicates(keep='last').index), :]
             if len(spatial_df_id.loc[~spatial_df_id.label_name.isnull(), :]) != 0:
                 columns.append('label_name')
             spatial_df_id = spatial_df_id.loc[:, columns]
-            spatial_df_id.loc[:, 'geom'] = map(lambda x: "ST_GeomFromText('{}', 4326)".format(x), spatial_df_id.geom)
+            if 'label_name' in columns:
+                columns.remove('label_name')
+            spatial_df_id.loc[:, 'geom'] = list(map(lambda x: "ST_GeomFromText('{}', 4326)".format(x), spatial_df_id.geometry))
             for index in spatial_df_id.index:
-                df = spatial_df_id.loc[spatial_df_id.index == index, :]
-                qdb.write_df(df, "site_{}".format(spatial_cat.lower()),
-                             schema='spatial')
+                df = spatial_df_id.loc[spatial_df_id.index == index, ['site_id', 'geom', 'activated', 'deactivated']]
+                qdb.write_df(df, table_name, schema='spatial')
 
     return shp_df
     
 
-def main(file_path):
+def main(file_path=""):
+    if file_path == "":
+        file_path = os.path.join(sys.argv[1], "")
     ref_data()
-    site_spatial_data(file_path)
+    return site_spatial_data(file_path)
 
 ###############################################################################
 if __name__ == "__main__":
     
-#    ref_data()
-    file_path = "D:\\Meryll\\Research\\LRKB\\IMU\\Site Map"
-    shp_df = site_spatial_data(file_path)
-    
+    main()

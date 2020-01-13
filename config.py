@@ -6,12 +6,13 @@ Created on Tue Sep 10 14:16:11 2019
 """
 
 import configparser
+import os 
+dir_path = os.path.dirname(os.path.realpath(__file__))
 #------------------------------------------------------------------------------
 
 
 def server_config():
-    cfile = "connections.cnf"
-    
+    cfile = os.path.join(dir_path, "connections.cnf")
     cnf = configparser.ConfigParser(inline_comment_prefixes=';')
     cnf.read(cfile)
     

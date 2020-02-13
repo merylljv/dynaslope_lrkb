@@ -102,7 +102,6 @@ def execute(query, dbc='pg'):
     connection = connect(dbc).connect()
     try:
         connection.execute(query)
-        print('Query executed')
     except Exception as e:
         if(connection):
             print("\n\nFailed to execute query: {}\n\n".format(e))
@@ -110,7 +109,6 @@ def execute(query, dbc='pg'):
         #closing database connection.
         if(connection):
             connection.close()
-            print("Connection closed")
             
             
 def write_df(df, table_name, schema='public', index=False, dbc='pg'):

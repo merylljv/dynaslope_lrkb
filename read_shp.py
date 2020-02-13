@@ -16,7 +16,7 @@ import re
 
 
 def shp_file_data(file_path, filename_list):
-    
+    print(file_path)
     active_path = file_path
     deactivated_path = "{}\\Deactivated".format(file_path)
     

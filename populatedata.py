@@ -117,7 +117,7 @@ def site_spatial_data(file_path):
                                        'name': 'mon_name'}, 
                         "Hazard_Zone": {'id': 'site_id'}}
     for spatial_cat in spatial_cat_dict.keys():
-        print(spatial_cat)
+        print("\n\n#####", spatial_cat, "#####")
         columns = ['site_id', 'geometry', 'activated', 'deactivated']
         table_name = spatial_cat.lower()
         spatial_df = shp_df.loc[shp_df.spatial_cat == spatial_cat]
@@ -131,6 +131,8 @@ def site_spatial_data(file_path):
         spatial_df = spatial_df.sort_values(['deactivated', 'version', 'activated'], ascending=[False, False, False])
         for index in set(spatial_df[spatial_cat_dict[spatial_cat]['id']]):
             spatial_df_id = spatial_df.loc[spatial_df[spatial_cat_dict[spatial_cat]['id']] == index, :]
+            if spatial_cat != 'Hazard_Zone':
+                print("#", spatial_df_id[spatial_cat_dict[spatial_cat]['name']].values[0])
             if len(spatial_df_id) > 1:
                 spatial_df_id = spatial_df_id.loc[spatial_df_id.index.isin(spatial_df_id.geometry.drop_duplicates(keep='last').index), :]
             if len(spatial_df_id.loc[~spatial_df_id.label_name.isnull(), :]) != 0:
@@ -138,19 +140,31 @@ def site_spatial_data(file_path):
             spatial_df_id = spatial_df_id.loc[:, columns]
             if 'label_name' in columns:
                 columns.remove('label_name')
-            spatial_df_id.loc[:, 'geom'] = list(map(lambda x: "ST_GeomFromText('{}', 4326)".format(x), spatial_df_id.geometry))
+            srid = spatial_df_id.crs['init'].split(':')[1]
+            spatial_df_id.loc[:, 'geom'] = list(map(lambda x: "ST_GeomFromText('{}', {})".format(x, srid), spatial_df_id.geometry))
             for index in spatial_df_id.index:
                 df = spatial_df_id.loc[spatial_df_id.index == index, ['site_id', 'geom', 'activated', 'deactivated']]
                 qdb.write_df(df, table_name, schema='spatial')
+            print("saved in database: srid =", srid)
+            
 
     return shp_df
     
 
 def main(file_path=""):
     if file_path == "":
-        file_path = os.path.join(sys.argv[1], "")
+        file_path = os.path.abspath(sys.argv[1])
     ref_data()
     return site_spatial_data(file_path)
+
+
+
+
+
+
+
+
+
 
 ###############################################################################
 if __name__ == "__main__":
